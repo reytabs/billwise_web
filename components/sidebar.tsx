@@ -1,4 +1,8 @@
 // components/sidebar.tsx
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Home,
   PieChart,
@@ -6,10 +10,59 @@ import {
   Target,
   Landmark,
   ArrowLeftRight,
+  LogOut,
 } from "lucide-react";
 import Link from "next/link";
 
+interface UserData {
+  name: string;
+  email: string;
+}
+
+function getInitials(name: string) {
+  const parts = name.trim().split(" ");
+  if (parts.length === 0) return "";
+  if (parts.length === 1) return parts[0][0].toUpperCase();
+  return parts[0][0].toUpperCase() + parts[parts.length - 1][0].toUpperCase();
+}
+
 export function Sidebar({ page }: { page: string }) {
+  const router = useRouter();
+  const [user, setUser] = useState<UserData | null>(null);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("userData");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed && parsed.name && parsed.email) {
+          setUser(parsed);
+        }
+      }
+    } catch (e) {
+      // ignore parsing errors
+    }
+  }, []);
+
+  const handleLogout = () => {
+    // Clear authentication tokens and user data from localStorage
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("token");
+    localStorage.removeItem("userData");
+
+    // Clear authentication cookies
+    document.cookie =
+      "accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
+    document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
+
+    // Redirect to login
+    router.replace("/auth/login");
+  };
+
+  const displayName = user?.name || "Guest";
+  const displayEmail = user?.email || "guest@example.com";
+  const initials = user ? getInitials(user.name) : "JD";
+
   return (
     <div className="w-64 bg-white border-r border-gray-200 h-screen fixed left-0 top-0 flex flex-col">
       <div className="p-6">
@@ -92,19 +145,22 @@ export function Sidebar({ page }: { page: string }) {
       </nav>
 
       <div className="p-4 border-t border-gray-200">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 mb-3">
           <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
-            <span className="text-indigo-600 font-semibold">JD</span>
+            <span className="text-indigo-600 font-semibold">{initials}</span>
           </div>
-          <div>
-            <p className="text-sm font-medium">
-              Guest
-            </p>
-            <p className="text-xs text-gray-500">
-              guest@example.com
-            </p>
+          <div className="flex-1">
+            <p className="text-sm font-medium">{displayName}</p>
+            <p className="text-xs text-gray-500">{displayEmail}</p>
           </div>
         </div>
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors"
+        >
+          <LogOut className="w-4 h-4" />
+          <span>Logout</span>
+        </button>
       </div>
     </div>
   );

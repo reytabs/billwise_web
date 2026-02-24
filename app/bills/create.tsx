@@ -6,6 +6,7 @@ import { z } from "zod";
 import axios from "axios";
 import api from "@/lib/api";
 import { useRouter } from "next/navigation";
+import { useBills } from "@/app/bills/BillsContext";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import {
@@ -73,7 +74,7 @@ type BillFormData = z.infer<typeof billSchema>;
 
 export default function BillCreatePage() {
   const router = useRouter();
-  
+  const { addBill } = useBills();
 
   const [date, setDate] = useState<Date>();
   const [enabled, setEnabled] = useState(false);
@@ -109,7 +110,8 @@ export default function BillCreatePage() {
   const handleDateChange = (newDate: Date | undefined) => {
     if (newDate) {
       setDate(newDate);
-      setFormData((prev) => ({ ...prev, dueDate: newDate }));
+      // schema expects due_date so update that property
+      setFormData((prev) => ({ ...prev, due_date: newDate }));
     }
   };
 
@@ -131,9 +133,18 @@ export default function BillCreatePage() {
       const response = await api.post("/bills", parsed);
       console.log("API Response:", response.data);
 
-      toast.success("Success", {
-        description: "Bill created successfully",
-      });
+      setTimeout(() => {
+        toast.success("Success", {
+          description: "Bill created successfully",
+        });
+        // update shared bills state so lists update immediately
+        try {
+          addBill(response.data);
+        } catch (e) {
+          // fallback to a full refresh if provider isn't available
+          router.refresh();
+        }
+      }, 2000);
 
       // Reset form and close dialog
       setFormData({
@@ -150,8 +161,10 @@ export default function BillCreatePage() {
       setEnabled(false);
       setIsOpen(false);
 
-      // Optionally redirect
+      // refresh the page so that any bill lists re-fetch
+      // Optionally redirect instead of refresh
       // router.push("/bills");
+      // or use revalidatePath('/bills');
     } catch (err: unknown) {
       if (err instanceof z.ZodError) {
         const fieldErrors: Partial<Record<keyof BillFormData, string>> = {};
@@ -277,13 +290,17 @@ export default function BillCreatePage() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectGroup>
-                          <SelectItem value="01">Utilities</SelectItem>
-                          <SelectItem value="02">Rent</SelectItem>
-                          <SelectItem value="03">Insurance</SelectItem>
-                          <SelectItem value="04">Subscription</SelectItem>
-                          <SelectItem value="05">Loan</SelectItem>
-                          <SelectItem value="06">Credit Card</SelectItem>
-                          <SelectItem value="07">Other</SelectItem>
+                          <SelectItem value="Utilities">Utilities</SelectItem>
+                          <SelectItem value="Rent">Rent</SelectItem>
+                          <SelectItem value="Insurance">Insurance</SelectItem>
+                          <SelectItem value="Subscription">
+                            Subscription
+                          </SelectItem>
+                          <SelectItem value="Loan">Loan</SelectItem>
+                          <SelectItem value="Credit Card">
+                            Credit Card
+                          </SelectItem>
+                          <SelectItem value="Other">Other</SelectItem>
                         </SelectGroup>
                       </SelectContent>
                     </Select>
@@ -304,9 +321,9 @@ export default function BillCreatePage() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectGroup>
-                          <SelectItem value="01">Upcoming</SelectItem>
-                          <SelectItem value="02">Paid</SelectItem>
-                          <SelectItem value="03">Overdue</SelectItem>
+                          <SelectItem value="Upcoming">Upcoming</SelectItem>
+                          <SelectItem value="Paid">Paid</SelectItem>
+                          <SelectItem value="Overdue">Overdue</SelectItem>
                         </SelectGroup>
                       </SelectContent>
                     </Select>
@@ -346,10 +363,10 @@ export default function BillCreatePage() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectGroup>
-                          <SelectItem value="01">Weekly</SelectItem>
-                          <SelectItem value="02">Monthly</SelectItem>
-                          <SelectItem value="03">Quarterly</SelectItem>
-                          <SelectItem value="04">Yearly</SelectItem>
+                          <SelectItem value="Weekly">Weekly</SelectItem>
+                          <SelectItem value="Monthly">Monthly</SelectItem>
+                          <SelectItem value="Quarterly">Quarterly</SelectItem>
+                          <SelectItem value="Yearly">Yearly</SelectItem>
                         </SelectGroup>
                       </SelectContent>
                     </Select>

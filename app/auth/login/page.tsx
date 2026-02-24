@@ -59,6 +59,7 @@ export default function LoginPage() {
           response.data?.data?.token;
         if (token) {
           localStorage.setItem("accessToken", token);
+          document.cookie = `accessToken=${token}; path=/; max-age=86400`;
         }
         router.push("/dashboard");
         setLoading(false);

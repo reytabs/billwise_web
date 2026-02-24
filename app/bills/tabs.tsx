@@ -10,7 +10,7 @@ import BillListPage from "./list";
 export default function BillTabs() {
   return (
     <div>
-      <Tabs defaultValue="upcoming" className="w-full">
+      <Tabs defaultValue="all" className="w-full">
         <div className="flex items-center justify-between w-full">
           <TabsList className="grid grid-cols-5 text-left">
             <TabsTrigger value="all" className="cursor-pointer active">

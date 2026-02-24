@@ -1,6 +1,7 @@
 import DashboardLayout from "@/components/dashboard-layout";
 import BillCreatePage from "./create";
 import BillTabs from "./tabs";
+import { BillsProvider } from "./BillsContext";
 
 export default function BillPage({ children }: { children: React.ReactNode }) {
   const pageName = "Bills";
@@ -8,14 +9,16 @@ export default function BillPage({ children }: { children: React.ReactNode }) {
   return (
     <DashboardLayout page={pageName} description={description}>
       {children}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900">{pageName}</h1>
-          <p className="text-slate-500 mt-1">{description}</p>
+      <BillsProvider>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900">{pageName}</h1>
+            <p className="text-slate-500 mt-1">{description}</p>
+          </div>
+          <BillCreatePage />
         </div>
-        <BillCreatePage />
-      </div>
-      <BillTabs />
+        <BillTabs />
+      </BillsProvider>
     </DashboardLayout>
   );
 }
