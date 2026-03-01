@@ -206,7 +206,7 @@ export default function BillCreatePage() {
         </DialogTrigger>
         <DialogContent className="sm:max-w-lg">
           <form onSubmit={handleSubmit}>
-            <DialogHeader>
+            <DialogHeader className="mb-5">
               <DialogTitle>Add Bill</DialogTitle>
               <DialogDescription>
                 Make changes to your bill here. Click save when you&apos;re
@@ -386,7 +386,7 @@ export default function BillCreatePage() {
                 </Field>
               </FieldGroup>
             </div>
-            <DialogFooter>
+            <DialogFooter className="mt-5">
               <DialogClose asChild>
                 <Button variant="outline" disabled={loading}>
                   Cancel
