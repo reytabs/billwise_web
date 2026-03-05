@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import BillwiseLogo from "@/components/billwise-logo";
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -90,8 +91,10 @@ export default function LoginPage() {
   };
 
   return (
-    <form onSubmit={handleSubmitForm}>
-      <Card className="w-full">
+    <>
+      <BillwiseLogo />
+      <form onSubmit={handleSubmitForm}>
+        <Card className="w-full">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl text-center">Sign in</CardTitle>
           <CardDescription className="text-center">
@@ -147,6 +150,7 @@ export default function LoginPage() {
           </p>
         </CardContent>
       </Card>
-    </form>
+      </form>
+    </>
   );
 }

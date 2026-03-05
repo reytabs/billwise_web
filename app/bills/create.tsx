@@ -65,7 +65,7 @@ const billSchema = z.object({
     .refine((date) => date instanceof Date, "Due date is required"),
   category: z.string().min(1, "Category is required"),
   status: z.string().min(1, "Status is required"),
-  recurring: z.boolean(),
+  is_recurring: z.boolean(),
   frequency: z.string().optional(),
   notes: z.string().optional(),
 });
@@ -74,7 +74,7 @@ type BillFormData = z.infer<typeof billSchema>;
 
 export default function BillCreatePage() {
   const router = useRouter();
-  const { addBill } = useBills();
+  const { addBill, loadBills } = useBills();
 
   const [date, setDate] = useState<Date>();
   const [enabled, setEnabled] = useState(false);
@@ -87,7 +87,7 @@ export default function BillCreatePage() {
     due_date: new Date(),
     category: "",
     status: "",
-    recurring: false,
+    is_recurring: false,
     frequency: "",
     notes: "",
   });
@@ -117,7 +117,7 @@ export default function BillCreatePage() {
 
   const handleRecurringChange = (checked: boolean) => {
     setEnabled(checked);
-    setFormData((prev) => ({ ...prev, recurring: checked }));
+    setFormData((prev) => ({ ...prev, is_recurring: checked }));
   };
 
   const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
@@ -140,6 +140,7 @@ export default function BillCreatePage() {
         // update shared bills state so lists update immediately
         try {
           addBill(response.data);
+          loadBills(); // refresh the bills list in case there are any formatting changes
         } catch (e) {
           // fallback to a full refresh if provider isn't available
           router.refresh();
@@ -153,7 +154,7 @@ export default function BillCreatePage() {
         due_date: new Date(),
         category: "",
         status: "",
-        recurring: false,
+        is_recurring: false,
         frequency: "",
         notes: "",
       });
@@ -249,6 +250,7 @@ export default function BillCreatePage() {
                       <Field>
                         <Label htmlFor="username-1">Due Date</Label>
                         <Button
+                          type="button"
                           variant="outline"
                           data-empty={!date}
                           className="data-[empty=true]:text-muted-foreground w-53 justify-between text-left font-normal"
